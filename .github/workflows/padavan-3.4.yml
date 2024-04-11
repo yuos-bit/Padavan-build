@@ -100,10 +100,19 @@ jobs:
 
     - name: 同步源码
       run: |
+        df -hT $PWD
         git clone --depth=1 $REPOSITORY_URL $WORK_PATH
         cd $WORK_PATH/toolchain-mipsel
-        sh dl_toolchain.sh
+        sudo sh dl_toolchain.sh
         mkdir -p /opt/images/
+        ln -sf /opt/padavan-3.4 $GITHUB_WORKSPACE/padavan-3.4
+
+    - name: 同步配置
+      run: |
+        [ -e $FEEDS_CONF ]
+        chmod +x $DIY_P1_SH
+        cd padavan-3.4
+        $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: 初始化插件
       run: | 
@@ -145,8 +154,6 @@ jobs:
         exit 1
         fi
         cp -f configs/templates/${{ github.event.inputs.target }}.config .config
-        chmod +x $DIY_P1_SH
-        $GITHUB_WORKSPACE/$DIY_P1_SH
         
     - name: 开始编译
       run: |
