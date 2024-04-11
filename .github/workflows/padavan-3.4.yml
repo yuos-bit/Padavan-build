@@ -168,7 +168,7 @@ jobs:
         mkdir -p $FIRMWARE_PATH/
         cd $WORK_PATH/trunk/images
         for firmwarefile in $(ls *.trx)
-        do sudo mv $firmwarefile $FIRMWARE_PATH/${FIRMWARE_DATEPREFIX}"_"${FIRMWARE_AUTHOR}"_"${{ github.event.inputs.target }}"_kernel3.4.trx"
+        do sudo mv $firmwarefile $FIRMWARE_PATH/${{ github.event.inputs.target }}"_kernel3.4_${FIRMWARE_DATEPREFIX}"_"${FIRMWARE_AUTHOR}"_".trx"
         done
         cd $FIRMWARE_PATH
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
