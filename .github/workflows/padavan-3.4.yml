@@ -49,7 +49,7 @@ on:
       firmwarever:
         description: 'firmware''s version'
         required: true
-        default: '20230201'
+        default: '20240411'
 
       upload_release:
         type: boolean
