@@ -65,6 +65,7 @@ env:
   FIRMWARE_AUTHOR: yuos-bit
   FIRMWARE_PATH: /opt/firmwares
   DIY_P1_SH: diy-config.sh
+  TZ: Asia/Shanghai
 
 jobs:
   build:
