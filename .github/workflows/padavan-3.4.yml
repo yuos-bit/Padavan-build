@@ -49,7 +49,7 @@ on:
       firmwarever:
         description: 'firmware''s version'
         required: true
-        default: '20240411'
+        default: '2023.411'
 
       upload_release:
         type: boolean
@@ -168,7 +168,7 @@ jobs:
         mkdir -p $FIRMWARE_PATH/
         cd $WORK_PATH/trunk/images
         for firmwarefile in $(ls *.trx)
-        do sudo mv $firmwarefile $FIRMWARE_PATH/${FIRMWARE_DATEPREFIX}"_"${FIRMWARE_AUTHOR}"_"${{ github.event.inputs.target }}"_kernel4.4.trx"
+        do sudo mv $firmwarefile $FIRMWARE_PATH/${FIRMWARE_DATEPREFIX}"_"${FIRMWARE_AUTHOR}"_"${{ github.event.inputs.target }}"_kernel3.4.trx"
         done
         cd $FIRMWARE_PATH
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
@@ -178,7 +178,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success'
       with:
-        name: Padavan4.4-${{ github.event.inputs.target }}
+        name: Padavan3.4-${{ github.event.inputs.target }}
         path: ${{ env.FIRMWARE }}
         
 
@@ -186,7 +186,7 @@ jobs:
       id: tag
       if: steps.organize.outputs.status == 'success' && github.event.inputs.upload_release == 'true' && !cancelled()
       run: |
-        echo "release_tag=$(date +"%Y.%m.%d-%H%M")-Padavan4.4-${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
+        echo "release_tag=$(date +"%Y.%m.%d-%H%M")-Padavan3.4-${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
         touch release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
