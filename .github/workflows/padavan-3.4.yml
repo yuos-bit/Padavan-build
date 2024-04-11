@@ -178,7 +178,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success'
       with:
-        name: Padavan3.4-${{ github.event.inputs.target }}
+        name: Padavan-3.4-${{ github.event.inputs.target }}
         path: ${{ env.FIRMWARE }}
         
 
@@ -186,7 +186,7 @@ jobs:
       id: tag
       if: steps.organize.outputs.status == 'success' && github.event.inputs.upload_release == 'true' && !cancelled()
       run: |
-        echo "release_tag=$(date +"%Y.%m.%d-%H%M")-Padavan3.4-${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
+        echo "release_tag=Padavan-3.4-$(date +"%Y.%m.%d-%H%M")-${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
         touch release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
