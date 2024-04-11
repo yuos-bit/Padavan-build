@@ -1,4 +1,4 @@
-name: 云编译4.4内核的Padavan
+name: 云编译3.4内核的Padavan
 
 on:
   workflow_dispatch:
