@@ -105,12 +105,6 @@ jobs:
         sudo sh dl_toolchain.sh
         mkdir -p /opt/images/
         ln -sf /opt/padavan-3.4 $GITHUB_WORKSPACE/padavan-3.4
-    
-    - name: 升级Go版本
-      run: |
-        cd /opt/hostedtoolcache/go
-        rm -rf /opt/hostedtoolcache/go/1.14.13
-        mv 1.15.6 1.14.13  
 
     - name: 同步编译预设插件
       run: | 
