@@ -40,22 +40,21 @@ on:
         - BELL-A040WQ
         - ZTE-E8820S
         - B70
-
       plugins:
         description: 'json format string of include configs'
         required: true
-        default: '{"aria":"n","transmission":"n","vpnsvr":"n","vpncli":"n","vpncmd":"n","openvpn":"n","ss":"y","v2ray":"n","xray":"y","trojan":"y","ssobfs":"y","dnsforwarder":"n","adbyby":"n","adguardhome":"n","smartdns":"n","aliddns":"n","zerotier":"n","frpc":"n","frps":"n","ddnsto":"n","wireguard":"n","aldriver":"n","sqm":"n","mentohust":"n","scutclient":"n","njitclient":"n","minieap":"n","dogcom":"n"}'
+        default: '{"cpu_overclock":"n","aria":"n","transmission":"n","vpnsvr":"n","vpncli":"n","vpncmd":"n","openvpn":"n","ss":"y","v2ray":"n","xray":"y","trojan":"y","ssobfs":"y","dnsforwarder":"n","adbyby":"n","adguardhome":"n","smartdns":"n","aliddns":"n","zerotier":"n","frpc":"n","frps":"n","ddnsto":"n","wireguard":"n","aldriver":"n","sqm":"n","mentohust":"n","scutclient":"n","njitclient":"n","minieap":"n","dogcom":"n"}'
 
       firmwarever:
         description: 'firmware''s version'
         required: true
-        default: '2024-04-11'
+        default: '20240810'
 
       upload_release:
         type: boolean
         description: 'upload firmware to RELEASE'
         required: true
-        default: 'false'
+        default: 'true'
 
 env:
   REPOSITORY_URL: https://github.com/yuos-bit/Padavan
@@ -72,9 +71,11 @@ jobs:
     if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
-    - name: Checkout
+    - name: 初始化工作流
       uses: actions/checkout@main
-    - name: Initialization environment
+
+    
+    - name: 安装编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -96,15 +97,16 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: Clone source code
+    - name: 拉取源码
       run: |
+        df -hT $PWD
         git clone --depth=1 $REPOSITORY_URL $WORK_PATH
         cd $WORK_PATH/toolchain-mipsel
         sudo sh dl_toolchain.sh
         mkdir -p /opt/images/
         ln -sf /opt/padavan-3.4 $GITHUB_WORKSPACE/padavan-3.4
-        
-    - name: Parse json string of include plugins
+
+    - name: 同步编译预设插件
       run: | 
         echo "aria=${{fromJson(github.event.inputs.plugins).aria}}" >> $GITHUB_ENV
         echo "transmission=${{fromJson(github.event.inputs.plugins).transmission}}" >> $GITHUB_ENV
@@ -136,8 +138,7 @@ jobs:
         echo "dogcom=${{fromJson(github.event.inputs.plugins).dogcom}}" >> $GITHUB_ENV
         echo "cpu_overclock=${{fromJson(github.event.inputs.plugins).cpu_overclock}}" >> $GITHUB_ENV
 
-
-    - name: Custom config
+    - name: 同步插件设置
       run: |
         cd $WORK_PATH/trunk
         if [ ! -f configs/templates/${{ github.event.inputs.target }}.config ] ; then
@@ -234,58 +235,43 @@ jobs:
         sed -i "s/FIRMWARE_BUILDS_REV=.*/FIRMWARE_BUILDS_REV=${{ github.event.inputs.firmwarever }}/g" ./versions.inc
         echo '更新版本号时间'
         #########################################################################################
-    - name: cpu_set
-      if: ${{env.cpu_overclock}}== y
-      run: |
-        cd $WORK_PATH/trunk
-        echo "CONFIG_FIRMWARE_INCLUDE_OC=${{env.cpu_overclock}}" >> .config #CPU超频开关
-        echo 'CONFIG_FIRMWARE_MT7621_OC="${{ github.event.inputs.cpu_set}}"' >> .config #此处填写对应频率的十六进制：1000Mhz=0x312 1100Mhz=0x362 1120Mhz=0x372 1200Mhz=0x3B2
 
-    - name: Build firmware
+    - name: 编译固件
       run: |
         cd $WORK_PATH/trunk
         sudo ./clear_tree
         sudo ./build_firmware_modify ${{ github.event.inputs.target }} 0
         echo "FIRMWARE_DATEPREFIX=$(date +"%Y%m%d")" >> $GITHUB_ENV
         
-    - name: Organize firmware files
+    - name: 整理固件文件
       id: organize
       run: |
         mkdir -p $FIRMWARE_PATH/
         cd $WORK_PATH/trunk/images
         for firmwarefile in $(ls *.trx)
-        do sudo mv $firmwarefile $FIRMWARE_PATH/${FIRMWARE_DATEPREFIX}"_"${FIRMWARE_AUTHOR}"_"${{ github.event.inputs.target }}"_kernel4.4.trx"
+        do sudo mv $firmwarefile $FIRMWARE_PATH/${{ github.event.inputs.target }}"_kernel3.4_${FIRMWARE_DATEPREFIX}"_"${FIRMWARE_AUTHOR}"_".trx"
         done
         cd $FIRMWARE_PATH
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
         
-    - name : Upload packages
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success'
-      with:
-        name: Padavan4.4-${{ github.event.inputs.target }}
-        path: ${{ env.FIRMWARE }}
-        
-    - name: Upload firmware to WeTransfer
-      if: steps.organize.outputs.status == 'success' && github.event.inputs.uploadwet == 'true'
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-        echo "url=$(cat wetransfer.log | grep https | cut -f3 -d" ")" >> $GITHUB_OUTPUT
-     
-    - name: Generate release tag
+        - name : 上传包
+        uses: actions/upload-artifact@main
+        if: steps.organize.outputs.status == 'success'
+        with:
+          name: Padavan3.4-${{ github.event.inputs.target }}
+          path: ${{ env.FIRMWARE }}
+          
+  
+    - name: 生成发布标签
       id: tag
       if: steps.organize.outputs.status == 'success' && github.event.inputs.upload_release == 'true' && !cancelled()
       run: |
-        echo "release_tag=$(date +"%Y.%m.%d-%H%M")-Padavan4.4-${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
+        echo "release_tag=$(date +"%Y.%m.%d-%H%M")-Padavan3.4-${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
         touch release.txt
-        [ $UPLOAD_COWTRANSFER = true ] && echo "🔗 [Cowtransfer](${{ steps.cowtransfer.outputs.url }})" >> release.txt
-        [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Upload firmware to release
+    - name: 上传固件发布
       uses: softprops/action-gh-release@v2.0.4
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
@@ -295,13 +281,13 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*     
     
-    - name: Delete workflow runs
+    - name: 删除工作流程运行
       uses: Mattraks/delete-workflow-runs@main
       with:
         retain_days: 7
         keep_minimum_runs: 4
     
-    - name: Remove old Releases
+    - name: 删除旧版本
       uses: dev-drprasad/delete-older-releases@master
       if: github.event.inputs.upload_release == 'true' && !cancelled()
       with:
@@ -310,7 +296,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    - name: Remove obsolete firmwares on artifacts
+    - name: 删除工件上过时的固件
       uses: c-hive/gha-remove-artifacts@v1.4.0
       if: steps.organizer.outputs.status == 'success'
       with:
