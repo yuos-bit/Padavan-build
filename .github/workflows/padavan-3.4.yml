@@ -254,12 +254,12 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
         
-        - name : 上传包
-        uses: actions/upload-artifact@main
-        if: steps.organize.outputs.status == 'success'
-        with:
-          name: Padavan3.4-${{ github.event.inputs.target }}
-          path: ${{ env.FIRMWARE }}
+    - name : 上传包
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success'
+      with:
+        name: Padavan3.4-${{ github.event.inputs.target }}
+        path: ${{ env.FIRMWARE }}
           
   
     - name: 生成发布标签
