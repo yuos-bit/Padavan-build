@@ -43,12 +43,12 @@ on:
       plugins:
         description: 'json format string of include configs'
         required: true
-        default: '{"aria":"n","transmission":"n","vpnsvr":"n","vpncli":"n","vpncmd":"n","openvpn":"n","ss":"y","v2ray":"n","xray":"y","trojan":"y","ssobfs":"y","dnsforwarder":"n","adbyby":"n","adguardhome":"n","smartdns":"n","aliddns":"n","zerotier":"n","frpc":"n","frps":"n","ddnsto":"n","wireguard":"n","aldriver":"n","sqm":"n","mentohust":"n","scutclient":"n","njitclient":"n","minieap":"n","dogcom":"n"}'
+        default: '{"aria":"n","transmission":"n","vpnsvr":"n","vpncli":"n","vpncmd":"n","openvpn":"n","ss":"n","v2ray":"n","xray":"n","trojan":"n","ssobfs":"n","dnsforwarder":"n","adbyby":"n","adguardhome":"n","smartdns":"n","aliddns":"n","zerotier":"n","frpc":"n","frps":"n","ddnsto":"n","wireguard":"n","aldriver":"n","sqm":"n","mentohust":"y","scutclient":"n","njitclient":"n","minieap":"y","dogcom":"n"}'
 
       firmwarever:
         description: 'firmware''s version'
         required: true
-        default: '20240810'
+        default: '20240903'
 
       upload_release:
         type: boolean
