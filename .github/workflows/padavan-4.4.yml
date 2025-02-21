@@ -298,9 +298,8 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
-
     - name: 上传到Cloudreve
-    if: steps.organize.outputs.status == 'success' && github.event.inputs.upload_cloudreve == 'true' && !cancelled()
+      if: steps.organize.outputs.status == 'success' && github.event.inputs.upload_cloudreve == 'true' && !cancelled()
       run: |
         # 获取日期前缀
         CURRENT_DATE=$(date +"%Y%m%d")
@@ -339,8 +338,7 @@ jobs:
             echo "未找到日志文件: $log"
           fi
         done
-        
-    
+
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@main
       with:
