@@ -48,7 +48,7 @@ on:
       firmwarever:
         description: 'firmware''s version'
         required: true
-        default: '20240903'
+        default: '20250221'
 
       upload_release:
         type: boolean
@@ -289,16 +289,16 @@ jobs:
     - name: 上传到Cloudreve
       if: steps.organize.outputs.status == 'success' && github.event.inputs.upload_cloudreve == 'true' && !cancelled()
       run: |
-          
+
           # 获取日期前缀
           CURRENT_DATE=$(date +"%Y%m%d")
-          
+
           # 获取设备型号
           DEVICE_MODEL="${{ github.event.inputs.target }}"
-          
+
           # 目标目录路径：20250220/miwifi-4c
           TARGET_DIR="${CURRENT_DATE}/${DEVICE_MODEL}"
-          
+
           # 检查目标目录是否存在
           echo "检查WebDAV目标目录: $TARGET_DIR"
           if ! curl -u "${{ secrets.WEBDAV_USERNAME }}:${{ secrets.WEBDAV_PASSWORD }}" --head "${{ secrets.WEBDAV_URL }}/${TARGET_DIR}" | grep -q "200 OK"; then
