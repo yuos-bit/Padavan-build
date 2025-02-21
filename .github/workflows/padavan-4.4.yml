@@ -296,22 +296,8 @@ jobs:
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
-        files: ${{ env.FIRMWARE }}/*     
-    
-    - name: Delete workflow runs
-      uses: Mattraks/delete-workflow-runs@main
-      with:
-        retain_days: 7
-        keep_minimum_runs: 4
-    
-    - name: Remove old Releases
-      uses: dev-drprasad/delete-older-releases@master
-      if: github.event.inputs.upload_release == 'true' && !cancelled()
-      with:
-        keep_latest: 8
-        delete_tags: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        files: ${{ env.FIRMWARE }}/*
+
 
     - name: 上传到Cloudreve
     if: steps.organize.outputs.status == 'success' && github.event.inputs.upload_cloudreve == 'true' && !cancelled()
@@ -353,7 +339,23 @@ jobs:
             echo "未找到日志文件: $log"
           fi
         done
+        
     
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@main
+      with:
+        retain_days: 7
+        keep_minimum_runs: 4
+    
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@master
+      if: github.event.inputs.upload_release == 'true' && !cancelled()
+      with:
+        keep_latest: 8
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Remove obsolete firmwares on artifacts
       uses: c-hive/gha-remove-artifacts@v1.4.0
       if: steps.organizer.outputs.status == 'success'
