@@ -301,7 +301,7 @@ jobs:
 
     - name: 上传到Cloudreve
     if: steps.organize.outputs.status == 'success' && github.event.inputs.upload_cloudreve == 'true' && !cancelled()
-    run: |
+      run: |
         # 获取日期前缀
         CURRENT_DATE=$(date +"%Y%m%d")
         # 获取设备型号
